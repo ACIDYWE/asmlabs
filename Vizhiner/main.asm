@@ -1,6 +1,5 @@
 ;========= MACROSES =========
-%include "macroses/func.mac"
-%include "macroses/consts.mac"
+%include "macroses/libmacro.mac"
 %include "macroses/darwin_syscalls.mac"
 ;======= END MACROSES =======
 
@@ -16,11 +15,11 @@ func exit
 endfunc
 
 
-func start
-    call helloworld
+start
+    call_func helloworld
 
-    call exit
-endfunc
+    call_func exit
+
     
 section .data
 str key, "Enter key: "

@@ -32,6 +32,7 @@
 %endmacro
 
 %macro sys_call 2+
+    ;syscall number, probably should to add rax to `syscall_args` macro ;)
     mov rax, %1
     syscall_args %2
     syscall

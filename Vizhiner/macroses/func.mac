@@ -3,41 +3,62 @@
 %ifndef ASM_FUNC_MAC
 %define ASM_FUNC_MAC
 
-%macro prologue 0-1 0
+%macro prologue 0
    push rbp
    mov  rbp, rsp
-   sub  rsp, %1
 %endmacro
 
-%macro pushargs 1-*
+%macro pushargs 1-4
     %rep %0
         push %1
-    %rotate 1
+        %rotate 1
     %endrep
 %endmacro
 
-%macro getargs 0-*
-    %rep %0
-        
-    %endrep
+%macro getargs 1
+    %define %1 rbp+16
+%endmacro
+
+%macro getargs 2
+    getargs %1
+    %define %2 rbp+24
+%endmacro
+
+%macro getargs 3
+    getargs %1, %2
+    %define %3 rbp+32
+%endmacro
+
+%macro getargs 4
+    getargs %1, %2, %3
+    %define %4 rbp+40
 %endmacro
 
 %macro call_func 1+
     %if %0 > 1
-        pushargs
+        pushargs %2
         call %1
+        add rsp, (%0-1)*8
     %else
+        call %1
+    %endif
+%endmacro
 
 ;TODO: probably need to use 'prologue' macro here
 %macro func 1+
     %push
-    getargs %2
+    prologue
+    
+    %if %0 > 1
+        getargs %2
+    %endif
+    
     %1:
 %endmacro
 
 ;TODO: and need to add 'leave' right here --
 %macro endfunc 0                        ;   |
-    %pop
+    %pop                                ;   |
     ret                                 ; <-- 
 %endmacro
 

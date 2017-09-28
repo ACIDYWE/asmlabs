@@ -1,0 +1,8 @@
+%ifndef ASM_LIBMACRO_MAC
+%define ASM_LIBMACRO_MAC
+
+%include "func.mac"
+%include "consts.mac"
+%include "syscall.mac"
+
+%endif
