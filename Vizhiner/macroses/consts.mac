@@ -1,3 +1,4 @@
+; vim: filetype=nasm
 %ifndef ASM_CONSTS_MAC
 %define ASM_CONSTS_MAC
 

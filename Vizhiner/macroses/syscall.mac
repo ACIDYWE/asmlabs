@@ -1,3 +1,4 @@
+; vim: filetype=nasm
 %ifndef ASM_SYSCALL_MAC
 %define ASM_SYSCALL_MAC
 
