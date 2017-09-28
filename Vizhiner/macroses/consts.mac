@@ -1,0 +1,8 @@
+%ifndef ASM_CONSTS_MAC
+%define ASM_CONSTS_MAC
+
+%define stdin 0
+%define stdout 1
+%define stdout 2
+
+%endif

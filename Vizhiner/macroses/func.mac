@@ -1,0 +1,49 @@
+; vim: filetype=nasm
+
+%ifndef ASM_FUNC_MAC
+%define ASM_FUNC_MAC
+
+%macro prologue 0-1 0
+   push rbp
+   mov  rbp, rsp
+   sub  rsp, %1
+%endmacro
+
+%macro pushargs 1-*
+    %rep %0
+        push %1
+    %rotate 1
+    %endrep
+%endmacro
+
+%macro getargs 0-*
+    %rep %0
+        
+    %endrep
+%endmacro
+
+%macro call_func 1+
+    %if %0 > 1
+        pushargs
+        call %1
+    %else
+
+;TODO: probably need to use 'prologue' macro here
+%macro func 1+
+    %push
+    getargs %2
+    %1:
+%endmacro
+
+;TODO: and need to add 'leave' right here --
+%macro endfunc 0                        ;   |
+    %pop
+    ret                                 ; <-- 
+%endmacro
+
+%macro str 2
+    %1:     db %2
+    %1.len: equ $-%1
+%endmacro
+
+%endif
