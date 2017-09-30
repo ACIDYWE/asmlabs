@@ -1,6 +1,5 @@
 ;========= MACROSES =========
-%include "macroses/libmacro.mac"
-%include "macroses/darwin_syscalls.mac"
+%include "linux_lib.mac"
 ;======= END MACROSES =======
 
 

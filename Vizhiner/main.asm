@@ -1,6 +1,5 @@
 ;========= MACROSES =========
-%include "macroses/libmacro.mac"
-%include "macroses/darwin_syscalls.mac"
+%include "linux_lib.mac"
 ;======= END MACROSES =======
 
 
@@ -8,18 +7,21 @@
 
 
 section .text
-global start
+global _start
 
-func exit
-    sys_call sys_exit, 0
+func exit, code
+    
+	mov [ code ], dword 5
+	sys_call sys_exit, [ code ]
+
 endfunc
 
-
-start
+_start:
     call_func helloworld
 
-    call_func exit
+    call_func exit, 0
 
+	ret ;debug ret for radare2
     
 section .data
 str key, "Enter key: "

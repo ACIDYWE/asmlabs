@@ -1,0 +1,18 @@
+%ifndef ASM_LIBMACRO_MAC
+%define ASM_LIBMACRO_MAC
+
+%push
+
+%pathsearch darwin_syscalls_mac		"darwin_syscalls.mac"
+%pathsearch funcs_mac				"func.mac"
+%pathsearch	consts_mac				"consts.mac"
+%pathsearch syscall_mac				"syscall.mac"
+
+%include func_mac
+%include consts_mac
+%include syscall_mac
+%include darwin_syscalls_mac
+
+%pop
+
+%endif

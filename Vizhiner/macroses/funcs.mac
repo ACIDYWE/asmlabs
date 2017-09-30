@@ -34,32 +34,44 @@
     %define %4 rbp+40
 %endmacro
 
-%macro call_func 1+
-    %if %0 > 1
+%macro call_func 1-5
+    %if %0 == 2
         pushargs %2
-        call %1
-        add rsp, (%0-1)*8
-    %else
-        call %1
-    %endif
+    %elif %0 == 3
+		pushargs %2, %3
+	%elif %0 == 4
+		pushargs %2, %3, %4
+	%elif %0 == 5
+		pushargs %2, %3, %4, %5
+	%endif
+		
+	call %1
+	add rsp, (%0-1)*8
 %endmacro
 
-;TODO: probably need to use 'prologue' macro here
-%macro func 1+
-    %push
+%macro func 1-5
+    %1:
+    
+	%push
     prologue
     
-    %if %0 > 1
+    %if %0 == 2
         getargs %2
-    %endif
+	%elif %0 == 3
+		getargs %2, %3
+	%elif %0 == 4
+		getargs %2, %3, %4
+	%elif %0 == 5
+		getargs %2, %3, %4, %5
+	%endif
     
-    %1:
 %endmacro
 
 ;TODO: and need to add 'leave' right here --
 %macro endfunc 0                        ;   |
     %pop                                ;   |
-    ret                                 ; <-- 
+    leave
+	ret                                 ; <-- 
 %endmacro
 
 %macro str 2
