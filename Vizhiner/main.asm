@@ -11,8 +11,8 @@ global _start
 
 func exit, code
     
-	mov [ code ], dword 5
-	sys_call sys_exit, [ code ]
+	mov [code], dword 5
+	sys_call sys_exit, [code]
 
 endfunc
 
