@@ -143,7 +143,7 @@ _setsockopt:
   push dword [server_fd]
   
   mov eax, 102
-  mov ebx, 12
+  mov ebx, 14
   mov ecx, esp
   int 80h
 
