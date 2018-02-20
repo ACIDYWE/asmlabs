@@ -140,7 +140,7 @@ _setsockopt:
   push optval
   push 2
   push 1
-  push [server_fd]
+  push dword [server_fd]
   
   mov eax, 102
   mov ebx, 12
