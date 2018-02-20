@@ -94,7 +94,7 @@ _handle_client:
     jg .inner_loop
 
   call _close_client
-  mov edi, 0
+  xor edi, edi
   call _exit
 
 
@@ -163,6 +163,7 @@ _setsockopt:
   cmp eax, 0
   jl _setsockopt_fail
 
+  leave
   ret
 
 _bind:
