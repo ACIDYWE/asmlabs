@@ -7,7 +7,7 @@ global _start
 %define AF_INET      2
 %define LOCALHOST    0
 %define SOCK_STREAM  1
-%define IP_PROT      0
+%define IP_PROT      2
 %define SOL_SOCKET   1
 %define SO_REUSEADDR 2
 
@@ -75,114 +75,188 @@ _start:
 
       call _echo
 
-      mov rax, [N]
-      cmp rax, 0
+      mov eax, [N]
+      cmp eax, 0
       jg .inner_loop
 
     call _close_client
     jmp .loop
 
-  xor rdi, rdi
+  xor edi, edi
   call _exit
 
 _read:
-  sys_call sys_read, [client_fd], BUF, 256
+  mov eax, 3
+  mov ebx, [client_fd]
+  mov ecx, BUF
+  mov edx, 256
+  int 80h
 
   mov [N], eax
 
   ret
 
 _echo:
-  sys_call sys_write, [client_fd], BUF, [N]
-
+  mov eax, 4
+  mov ebx, [client_fd]
+  mov ecx, BUF
+  mov edx, [N]
+  int 80h
+  
   ret
 
 _close_client:
-  sys_call sys_close, [client_fd]
+  mov eax, 6
+  mov ebx, [client_fd]
 
   ret
 
 _socket:
-  sys_call sys_socket, AF_INET, SOCK_STREAM, IP_PROT
+  push ebp
+  mov ebp, esp
 
-  cmp rax, 0
+  push 6
+  push 1
+  push 2
+
+  mov  eax, 102                 ; sys_socketcall
+  mov  ebx, 1                   ; invoke the socket function 
+  mov  ecx, esp
+  int  0x80
+    
+  cmp eax, 0
   jl _socket_fail
 
   mov [server_fd], eax
 
+  leave
   ret
 
 _setsockopt:
-  mov dword [optval], 1
-  sys_call sys_setsockopt, [server_fd], SOL_SOCKET, SO_REUSEADDR, optval, 4
+  push ebp
+  mov ebp, esp
 
-  cmp rax, 0
+  push 4
+  push optval
+  push 2
+  push 1
+  push [server_fd]
+  
+  mov eax, 102
+  mov ebx, 12
+  mov ecx, esp
+  int 80h
+
+  cmp eax, 0
   jl _setsockopt_fail
 
   ret
 
 _bind:
-  sys_call sys_bind, [server_fd], pop_sa, pop_sa.len
+  push ebp
+  mov ebp, esp
+    
+  push 16
+  push dword pop_sa
+  push dword [server_fd]
 
-  cmp rax, 0
+  mov eax, 102
+  mov ebx, 2
+  mov ecx, esp
+  int 80h
+
+  cmp eax, 0
   jl _bind_fail
 
+  leave
   ret
 
 _listen:
-  sys_call sys_listen, [server_fd], 5
+  push ebp
+  mov ebp, esp
 
-  cmp rax, 0
+  push  byte 5
+  push  dword [server_fd]
+
+  mov  eax, 102                 ; sys_socketcall
+  mov  ebx, 4                   ; listen()
+  mov  ecx, esp                 ; arguments on the stack
+  int  0x80
+
+  cmp eax, 0
   jl _listen_fail
-
+  
+  leave
   ret
 
 _accept:
-  sys_call sys_accept, [server_fd], 0, 0
+  push ebp
+  mov ebp, esp
 
-  cmp rax, 0
+  push  0
+  push  0
+  push  dword [server_fd]
+
+; accept syscall
+  mov  eax, 102                 ; sys_socketcall
+  mov  ebx, 5                   ; accept()
+  mov  ecx, esp                 ; arguments on the stack
+  int  0x80
+
+  cmp eax, 0
   jl _accept_fail
 
   mov [client_fd], eax
 
   call _new_connection
 
+  leave
   ret
 
 _new_connection:
-  sys_call sys_write, stdout, _new_conn, _new_conn.len
+  mov eax, 4
+  mov ebx, stdout
+  mov ecx, _new_conn
+  mov edx, _new_conn.len
+  int 80h
 
   ret
 
 _socket_fail:
-  mov rsi, _socket_fail_msg
-  mov rdx, _socket_fail_msg.len
+  mov esi, _socket_fail_msg
+  mov edx, _socket_fail_msg.len
   call _fail
 
 _setsockopt_fail:
-  mov rsi, _setsockopt_fail_msg
-  mov rdx, _setsockopt_fail_msg.len
+  mov esi, _setsockopt_fail_msg
+  mov edx, _setsockopt_fail_msg.len
   call _fail
 
 _bind_fail:
-  mov rsi, _bind_fail_msg
-  mov rdx, _bind_fail_msg.len
+  mov esi, _bind_fail_msg
+  mov edx, _bind_fail_msg.len
   call _fail
 
 _listen_fail:
-  mov rsi, _listen_fail_msg
-  mov rdx, _listen_fail_msg.len
+  mov esi, _listen_fail_msg
+  mov edx, _listen_fail_msg.len
   call _fail
 
 _accept_fail:
-  mov rsi, _accept_fail_msg
-  mov rdx, _accept_fail_msg.len
+  mov esi, _accept_fail_msg
+  mov edx, _accept_fail_msg.len
   call _fail
 
 _fail:
-  sys_call sys_write, stdout, rsi, rdx
-  mov rdi, 1
+  mov eax, 4
+  mov ebx, stdout
+  mov ecx, esi
+  int 80h
+  
+  mov edi, 1
   call _exit
 
 _exit:
-  sys_call sys_exit, rdi
+    mov eax, 1
+    mov ebx, edi
+    int 80h
