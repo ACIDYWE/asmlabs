@@ -68,22 +68,35 @@ _start:
 
   .loop:
     call _accept
+    
+    mov eax, 2
+    xor ebx, ebx
+    int 80h
 
-    .inner_loop:
+    cmp eax, 0
+    jz _handle_client
 
-      call _read
 
-      call _echo
-
-      mov eax, [N]
-      cmp eax, 0
-      jg .inner_loop
-
-    call _close_client
     jmp .loop
 
   xor edi, edi
   call _exit
+
+_handle_client:
+  .inner_loop:
+
+    call _read
+
+    call _echo
+
+    mov eax, [N]
+    cmp eax, 0
+    jg .inner_loop
+
+  call _close_client
+  mov edi, 0
+  call _exit
+
 
 _read:
   mov eax, 3
@@ -140,8 +153,7 @@ _setsockopt:
   push optval
   push 2
   push 1
-  mov ecx, [server_fd]
-  push ecx
+  push dword [server_fd]
   
   mov eax, 102
   mov ebx, 14
